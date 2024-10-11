@@ -134,7 +134,14 @@ def create_account():
     db.session.add(new_account)
     db.session.commit()  # Persist the data
 
-    return jsonify({"message": "Account created successfully!"}), 201
+    return jsonify({
+        "id": new_account.acc_id,
+        "name": new_account.name,
+        "address": new_account.address,
+        "phone_number": new_account.phone_number,
+        "wishlist": new_account.wishlist,
+        "seller_id": new_account.seller_id
+    }), 201
 
 
 @app.route('/api/accounts', methods=['GET'])
@@ -173,7 +180,14 @@ def login():
     # Verify the password
     if bcrypt.checkpw(password.encode('utf-8'), account.password.encode('utf-8')):
         # Password is correct, return success message
-        return jsonify({"message": "Login successful!"}), 200
+                return jsonify({
+            "id": account.acc_id,
+            "name": account.name,
+            "address": account.address,
+            "phone_number": account.phone_number,
+            "wishlist": account.wishlist,
+            "seller_id": account.seller_id
+        }), 200
     else:
         # Password is incorrect
         return jsonify({"message": "Invalid password!"}), 401
