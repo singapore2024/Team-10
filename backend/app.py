@@ -100,9 +100,10 @@ class Transaction(db.Model):
 
 
 # Initialize the database
-@app.before_first_request
 def initialize_database():
-    db.create_all()
+    with app.app_context():
+        db.create_all()
+        print("Database initialized successfully!")
 
 
 # Endpoint to add a new user account
@@ -112,11 +113,14 @@ def create_account():
 
     # Extracting fields from the request
     name = data.get('name')
-    address = data.get('address')
+    address = data.get('address', '') #Optional first
     phone_number = data.get('phone_number')
     password = data.get('password')
     wishlist = data.get('wishlist', '')  # Optional field, default to empty string
-    seller_id = data.get('seller_id')  # Optional field, can be None
+    seller_flag = data.get('seller_flag')
+    seller_id = None
+    if seller_flag == '1':
+        seller_id = phone_number 
 
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
@@ -167,11 +171,11 @@ def login():
     data = request.json  # Expecting JSON data
 
     # Extracting username and password from the request
-    name = data.get('name')
+    phone_number = data.get('phone_number')
     password = data.get('password')
 
     # Check if the account exists
-    account = Account.query.filter_by(name=name).first()
+    account = Account.query.filter_by(phone_number=phone_number).first()
 
     if account is None:
         # If account does not exist, return an error
@@ -197,4 +201,5 @@ def test():
     return "Flask app is running!"
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    initialize_database() 
+    app.run(debug=True, use_reloader=False)
