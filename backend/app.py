@@ -59,16 +59,18 @@ class Seller(db.Model):
 class Account(db.Model):
     __tablename__ = 'account'
     
-    acc_id = db.Column(db.Integer, primary_key=True)
+    # Using phone_number as primary key
+    phone_number = db.Column(db.String(20), primary_key=True, nullable=False)
+    
     name = db.Column(db.String(255))
     address = db.Column(db.String(255))
-    phone_number = db.Column(db.String(20))
     password = db.Column(db.String(255))
     seller_id = db.Column(db.Integer, db.ForeignKey('seller.seller_id'), nullable=True)
     wishlist = db.Column(db.Text)
 
     # One-to-Many relationship with Transaction
     transactions = db.relationship('Transaction', backref='account', lazy=True)
+
 
 
 class Product(db.Model):
@@ -91,7 +93,7 @@ class Transaction(db.Model):
     __tablename__ = 'transaction'
     
     trans_id = db.Column(db.Integer, primary_key=True)
-    acc_id = db.Column(db.Integer, db.ForeignKey('account.acc_id'))
+    phone_number = db.Column(db.String(20), db.ForeignKey('account.phone_number'))
     seller_id = db.Column(db.Integer, db.ForeignKey('seller.seller_id'))
     unid = db.Column(db.Integer, db.ForeignKey('product.unid'))
     qty = db.Column(db.Integer)
@@ -100,9 +102,10 @@ class Transaction(db.Model):
 
 
 # Initialize the database
-@app.before_first_request
 def initialize_database():
-    db.create_all()
+    with app.app_context():
+        db.create_all()
+        print("Database initialized successfully!")
 
 
 # Endpoint to add a new user account
@@ -112,11 +115,14 @@ def create_account():
 
     # Extracting fields from the request
     name = data.get('name')
-    address = data.get('address')
+    address = data.get('address', '') #Optional first
     phone_number = data.get('phone_number')
     password = data.get('password')
     wishlist = data.get('wishlist', '')  # Optional field, default to empty string
-    seller_id = data.get('seller_id')  # Optional field, can be None
+    seller_flag = data.get('seller_flag')
+    seller_id = None
+    if seller_flag == '1':
+        seller_id = phone_number 
 
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
@@ -135,7 +141,6 @@ def create_account():
     db.session.commit()  # Persist the data
 
     return jsonify({
-        "id": new_account.acc_id,
         "name": new_account.name,
         "address": new_account.address,
         "phone_number": new_account.phone_number,
@@ -151,11 +156,11 @@ def get_all_accounts():
 
     # Print each account's details, including seller_id
     for account in accounts:
-        print(f"ID: {account.acc_id}, Name: {account.name}, Address: {account.address}, "
+        print(f"Name: {account.name}, Address: {account.address}, "
               f"Phone: {account.phone_number}, Wishlist: {account.wishlist}, Seller ID: {account.seller_id}")
 
     # Return a JSON response including the seller_id
-    account_list = [{"id": account.acc_id, "name": account.name, "address": account.address,
+    account_list = [{"name": account.name, "address": account.address,
                      "phone_number": account.phone_number, "wishlist": account.wishlist,
                      "seller_id": account.seller_id, "password": account.password}  # Include seller_id
                     for account in accounts]
@@ -167,11 +172,11 @@ def login():
     data = request.json  # Expecting JSON data
 
     # Extracting username and password from the request
-    name = data.get('name')
+    phone_number = data.get('phone_number')
     password = data.get('password')
 
     # Check if the account exists
-    account = Account.query.filter_by(name=name).first()
+    account = Account.query.filter_by(phone_number=phone_number).first()
 
     if account is None:
         # If account does not exist, return an error
@@ -181,7 +186,6 @@ def login():
     if bcrypt.checkpw(password.encode('utf-8'), account.password.encode('utf-8')):
         # Password is correct, return success message
                 return jsonify({
-            "id": account.acc_id,
             "name": account.name,
             "address": account.address,
             "phone_number": account.phone_number,
@@ -197,4 +201,5 @@ def test():
     return "Flask app is running!"
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    initialize_database() 
+    app.run(debug=True, use_reloader=False)
