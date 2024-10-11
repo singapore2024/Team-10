@@ -55,7 +55,7 @@ const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSideP
     // Set success message after successful submission
     setSuccessMessage('Item added successfully!');
 
-    // Optionally, clear form fields after submission
+    // Clear form fields after submission
     setProductName('');
     setPrice('');
     setImageFile(null);
@@ -63,8 +63,10 @@ const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSideP
     setProductType('');
     setOtherType('');
 
-    // Optionally redirect after a delay (uncomment the below line to enable redirection)
-    // setTimeout(() => router.push('/'), 2000);  // Redirect after 2 seconds
+    // Redirect to the buyer page (main page) after 2 seconds
+    setTimeout(() => {
+      router.push('/');  // Redirect to the main page
+    }, 1200);
   };
 
   return (
@@ -159,7 +161,7 @@ const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSideP
             </div>
           )}
 
-          <button type="submit" className="submit-btn">Submit Product</button>
+          <button type="submit" className="submit-btn">Sell Product</button>
         </form>
       </div>
 
