@@ -1,9 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from enum import Enum
+import os, bcrypt, uuid
 from flask_cors import CORS
-import os
-import bcrypt
 from dotenv import load_dotenv
 
 
@@ -77,8 +76,7 @@ class Account(db.Model):
 class Product(db.Model):
     __tablename__ = 'product'
     
-    unid = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.String(255))
+    product_id = db.Column(db.Integer, primary_key=True)
     seller_id = db.Column(db.Integer, db.ForeignKey('seller.seller_id'))
     qty = db.Column(db.Integer)
     price = db.Column(db.Numeric(10, 2))
@@ -96,7 +94,7 @@ class Transaction(db.Model):
     trans_id = db.Column(db.Integer, primary_key=True)
     phone_number = db.Column(db.String(20), db.ForeignKey('account.phone_number'))
     seller_id = db.Column(db.Integer, db.ForeignKey('seller.seller_id'))
-    unid = db.Column(db.Integer, db.ForeignKey('product.unid'))
+    product_id = db.Column(db.Integer, db.ForeignKey('product.product_id'))
     qty = db.Column(db.Integer)
     total = db.Column(db.Numeric(10, 2))
     trans_status = db.Column(db.Enum(TransactionStatus))
@@ -196,6 +194,117 @@ def login():
     else:
         # Password is incorrect
         return jsonify({"message": "Invalid password!"}), 401
+    
+# POST endpoint to add a new seller
+@app.route('/api/add_seller', methods=['POST'])
+def add_seller():
+    data = request.get_json()
+    locations = data.get('location')
+    phone_number = data.get('phone_number')
+    rating = 0
+    if not locations or not phone_number:
+        return jsonify({"message": "Missing required fields!"}), 400
+    
+    account = db.session.get(Account, phone_number)
+    if not account:
+        return jsonify({"message": "Account not found!"}), 404
+    
+    # if already have sellerid dont create new seller
+    if account.seller_id:
+        return jsonify({"message": "Seller already exists!"}), 409
+    
+    new_seller = Seller(location=locations, rating=rating)
+
+    db.session.add(new_seller)
+    account.seller_id = new_seller.seller_id
+    db.session.add(account)
+    db.session.commit()
+    account.seller_id = new_seller.seller_id
+    db.session.add(account)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Seller added successfully!",
+        "seller": {
+            "seller_id": new_seller.seller_id,
+            "location": new_seller.location,
+            "rating": new_seller.rating,
+            "account_phone_number": account.phone_number
+        }
+    }), 201
+
+@app.route('/api/sellers', methods=['GET'])
+def get_all_sellers():
+    sellers = Seller.query.all()
+    seller_list = [{"seller_id": seller.seller_id, "location": seller.location, "rating": seller.rating} for seller in sellers]
+    return jsonify(seller_list), 200
+
+@app.route('/api/sellers/<int:seller_id>', methods=['GET'])
+def get_seller_by_id(seller_id):
+    seller = Seller.query.get(seller_id)
+    if seller is None:
+        return jsonify({"message": "Seller not found!"}), 404
+    return jsonify({"seller_id": seller.seller_id, "location": seller.location, "rating": seller.rating}), 200
+
+@app.route('/api/products', methods=['GET'])
+def get_all_products():
+    products = Product.query.all()
+    product_list = [{"product_id": product.product_id, "seller_id": product.seller_id, "qty": product.qty, "price": str(product.price), "name": product.name, "image": product.image, "type": product.type} for product in products]
+    return jsonify(product_list), 200
+
+@app.route('/api/products', methods=['POST'])
+def add_product():
+    data = request.get_json()
+    seller_id = data.get('seller_id')
+    qty = data.get('qty')
+    price = data.get('price')
+    name = data.get('name')
+    image = data.get('image', '')
+    type = data.get('type')
+    if not seller_id or not qty or not price or not name or not image or not type:
+        return jsonify({"message": "Missing required fields!"}), 400
+    if not Seller.query.get(seller_id):
+        return jsonify({"message": "Seller not found!"}), 404
+    new_product = Product(seller_id=seller_id, qty=qty, price=price, name=name, image=image, type=type)
+    db.session.add(new_product)
+    db.session.commit()
+    return jsonify({
+    "message": "Product added successfully!",
+    "product": {
+        "product_id": new_product.product_id,
+        "seller_id": new_product.seller_id,
+        "name": new_product.name,
+        "price": new_product.price,
+        "description": new_product.description,
+        "image": new_product.image,
+        "category": new_product.category
+    }
+}), 201
+
+# Get products from seller
+@app.route('/api/sellers/<int:seller_id>/products', methods=['GET'])
+def get_products_by_seller(seller_id):
+    products = Product.query.filter_by(seller_id=seller_id).all()
+    if not products:
+        return jsonify({"message": "No products found!"}), 404
+    product_list = [{"unid": product.unid, "product_id": product.product_id, "seller_id": product.seller_id, "qty": product.qty, "price": str(product.price), "name": product.name, "image": product.image, "type": product.type} for product in products]
+    return jsonify(product_list), 200
+
+# Create transaction
+@app.route('/api/transactions', methods=['POST'])
+def create_transaction():
+    data = request.get_json()
+    acc_id = data.get('acc_id')
+    seller_id = data.get('seller_id')
+    unid = data.get('unid')
+    qty = data.get('qty')
+    total = data
+    new_transaction = Transaction(acc_id=acc_id, seller_id=seller_id, unid=unid, qty=qty, total=total)
+    db.session.add(new_transaction)
+    db.session.commit()
+    return jsonify({"message": "Transaction created successfully!"}), 201
+
+    
 
 @app.route('/')
 def test():
