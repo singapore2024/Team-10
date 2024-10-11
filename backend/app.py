@@ -1,14 +1,35 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from enum import enum
+from enum import Enum
+import os
+from dotenv import load_dotenv
+from sqlalchemy import text
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
 
 # Configure SQLite database URI
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydatabase.db'
+database_uri = os.getenv('SQL_DATABASE_URI')
+if not database_uri:
+    raise RuntimeError("SQL_DATABASE_URI environment variable not set")
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 
 db = SQLAlchemy()
+db.init_app(app)
+
+# # Test database connection
+# try:
+#     with app.app_context():
+#         with db.engine.connect() as connection:
+#             connection.execute(text('SELECT 1'))
+#     print("Database connection successful!")
+# except Exception as e:
+#     print(f"Error connecting to the database: {e}")
+
 
 # Enum for transaction status
 class TransactionStatus(Enum):
