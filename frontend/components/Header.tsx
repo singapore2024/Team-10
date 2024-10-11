@@ -25,7 +25,7 @@ export default function Header({companyTitle}: {companyTitle?: string}) {
 					<div className='page-header__logo'>
 						<Link href='/'>
 							<a>
-								<img src={logoImg.src} width={logoImg.width} height={logoImg.height} alt={title} className='page-header__logo-img'/>
+								<img src='./logo.jpg' width={logoImg.width} height={logoImg.height} alt={title} className='page-header__logo-img'/>
 							</a>
 						</Link>
 					</div>
