@@ -2,13 +2,13 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from enum import Enum
 import os
+import bcrypt
 from dotenv import load_dotenv
-from sqlalchemy import text
+
+
 
 # Load environment variables from .env file
 load_dotenv()
-from enum import Enum
-import bcrypt
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -34,7 +34,6 @@ db.init_app(app)
 # except Exception as e:
 #     print(f"Error connecting to the database: {e}")
 
-db = SQLAlchemy(app)
 
 # Enum for transaction status
 class TransactionStatus(Enum):
@@ -156,7 +155,7 @@ def get_all_accounts():
 
     return jsonify(account_list), 200
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login():
     data = request.json  # Expecting JSON data
 
