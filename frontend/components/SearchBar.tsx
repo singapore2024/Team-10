@@ -14,7 +14,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ products, setFilteredResults }) =
   // Fuse.js configuration for semantic search
   const fuse = new Fuse(products, {
     keys: ['name', 'description', 'type'], // Fields in products to search in
-    threshold: 0.3, // Adjust fuzziness (0 = perfect match, 1 = anything matches)
+    threshold: 0.5, // Adjust fuzziness (0 = perfect match, 1 = anything matches)
+    distance: 100, // Max distance between matching characters (higher is more lenient)
+    minMatchCharLength: 2, // Minimum characters to match
+    includeScore: true, 
   });
 
   const handleSearch = (e: React.FormEvent) => {
