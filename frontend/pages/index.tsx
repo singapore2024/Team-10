@@ -8,6 +8,8 @@ import ProductCard from '../components/ProductCard';
 import SearchBar from '../components/SearchBar';
 import { makeAllMenus } from '../lib/menu';
 import { IMenuItem } from '../@types/components';
+import Chatbot from '../components/Chatbot';
+
 
 interface IndexPageProps {
   mainMenu: IMenuItem[];
@@ -50,6 +52,7 @@ export default function IndexPage({ mainMenu, footerMenu }: IndexPageProps) {
           </div>
         </div>
       </div>
+	  <Chatbot />
     </MainLayout>
   );
 }
