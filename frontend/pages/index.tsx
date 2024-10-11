@@ -14,11 +14,13 @@ import cliff2Img from '../assets/bann2.jpg';
 // import bgPortraitImg from '../assets/cover-bg-portrait.jpg';
 import ProductsSliderByQuery from '../components/ProductsSliderByQuery';
 import {IBasicSettings} from '../@types/settings';
+import SearchBar from '../components/SearchBar';
 
 export default function IndexPage({products, mainMenu, footerMenu, basicSettings}: InferGetServerSidePropsType<typeof getServerSideProps>) {
 	return (
 		<MainLayout mainMenu={mainMenu} footerMenu={footerMenu} basicSettings={basicSettings}>
 			<div className='container'>
+                <SearchBar />
 				<MainPageSlider />
 						<h1 className='page-heading page-heading_h1  page-heading_m-h1'>Shopper's Delight</h1>
 
