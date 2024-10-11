@@ -2,6 +2,7 @@ import {Provider} from 'react-redux';
 import {store} from '../redux/store';
 import 'nprogress/nprogress.css';
 import '../styles/styles.scss';
+import '../styles/Login.module.scss';
 
 import 'swiper/scss';
 import 'swiper/scss/navigation';
