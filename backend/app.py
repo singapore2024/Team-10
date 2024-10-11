@@ -99,10 +99,10 @@ class Transaction(db.Model):
     trans_status = db.Column(db.Enum(TransactionStatus))
 
 
-# Initialize the database
-@app.before_first_request
-def initialize_database():
-    db.create_all()
+# # Initialize the database
+# @app.before_first_request
+# def initialize_database():
+#     db.create_all()
 
 
 # Endpoint to add a new user account
