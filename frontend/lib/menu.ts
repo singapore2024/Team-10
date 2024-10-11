@@ -35,7 +35,7 @@ export const makeMenuByCategoryTree = ({categoryTree, isActiveClb}: {categoryTre
 export const makeAllMenus = ({categoryTree, activeCategoryId}: {categoryTree: ICategory[], activeCategoryId?: number}): IMenus => {
 	const mainMenu: IMenuItem[] = [
 		{
-			title: 'Seller Dashboard',
+			title: 'Buyer Dashboard',
 			url: '/',
 			isActive: activeCategoryId === undefined,  // Make active if no category is active
 		}

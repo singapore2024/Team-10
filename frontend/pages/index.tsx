@@ -21,16 +21,9 @@ export default function IndexPage({products, mainMenu, footerMenu, basicSettings
 			<div className='container'>
 				<MainPageSlider />
 						<h1 className='page-heading page-heading_h1  page-heading_m-h1'>Shopper's Delight</h1>
-						<ProductsList products={products} query={{}}/>
+
 			</div>
-			<div className='container'>
-				<h2 className='page-heading page-heading_h1  page-heading_m-h1'>Products carousel:</h2>
-				<ProductsSliderByQuery
-					query={{collection: ['main-page'], sort: 'in_collection'}}
-					title={'Collection title'}
-					wrapperClassName='page-block'
-				/>
-			</div>
+			
 		</MainLayout>
 	);
 }
