@@ -6,7 +6,7 @@ export default function FooterMenu({menuList}: {menuList: IMenuItem[]}) {
 	return (
 		<>
 			<h3 className='page-footer__header'>Most popular</h3>
-			<ul className='page-footer-menu list-unstyled' itemScope itemType='//schema.org/ItemList'>
+			{/* <ul className='page-footer-menu list-unstyled' itemScope itemType='//schema.org/ItemList'>
 				{menuList.map((item, i) => (
 					<li
 						className={clsx('page-footer-menu__list-element', {
@@ -16,10 +16,10 @@ export default function FooterMenu({menuList}: {menuList: IMenuItem[]}) {
 					>
 						<div itemProp='itemListElement' itemScope itemType='//schema.org/ListItem'>
 							<ListElement item={item} position={i} />
-						</div>
-					</li>
-				))}
-			</ul>
+						</div> */}
+					{/* </li>
+				))} */}
+			{/* </ul> */}
 		</>
 	);
 }

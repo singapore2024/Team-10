@@ -1,5 +1,6 @@
 import { InferGetServerSidePropsType, GetServerSideProps } from 'next';
 import { useState } from 'react';
+import { useRouter } from 'next/router';  // Import useRouter hook
 import MainLayout from '../layouts/Main';
 import { makeAllMenus } from '../lib/menu';
 import { apiClient } from '../lib/api';
@@ -7,13 +8,16 @@ import { IMenuItem } from '../@types/components';
 import { IBasicSettings } from '../@types/settings';
 
 const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  // State to hold form data
   const [productName, setProductName] = useState('');
   const [price, setPrice] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);  // Updated for file input
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
-  const [productType, setProductType] = useState('');  // New state for product type
-  const [otherType, setOtherType] = useState('');  // For "Other" type input
+  const [productType, setProductType] = useState('');
+  const [otherType, setOtherType] = useState('');
+
+  const [successMessage, setSuccessMessage] = useState('');  // State for success message
+
+  const router = useRouter();  // Initialize the useRouter hook
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -22,13 +26,14 @@ const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSideP
   };
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newQuantity = Math.max(0, parseInt(e.target.value, 10));  // Prevent quantity from being less than 0
+    const newQuantity = Math.max(0, parseInt(e.target.value, 10));
     setQuantity(newQuantity);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
+
+    // Handle form submission (e.g., send to API)
     const formData = new FormData();
     formData.append('productName', productName);
     formData.append('price', price);
@@ -36,30 +41,43 @@ const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSideP
       formData.append('image', imageFile);
     }
     formData.append('quantity', quantity.toString());
-    formData.append('productType', productType === 'Other' ? otherType : productType);  // Save otherType if "Other" is selected
+    formData.append('productType', productType === 'Other' ? otherType : productType);
 
-    // For demonstration purposes, log the form data (you can send this to an API)
+    // Simulate an API call and set success message
     console.log({
       productName,
       price,
-      imageFile, // This will log the file information
+      imageFile,
       quantity,
       productType: productType === 'Other' ? otherType : productType,
     });
 
-    // Reset the form after submission
+    // Set success message after successful submission
+    setSuccessMessage('Item added successfully!');
+
+    // Optionally, clear form fields after submission
     setProductName('');
     setPrice('');
     setImageFile(null);
     setQuantity(1);
     setProductType('');
     setOtherType('');
+
+    // Optionally redirect after a delay (uncomment the below line to enable redirection)
+    // setTimeout(() => router.push('/'), 2000);  // Redirect after 2 seconds
   };
 
   return (
     <MainLayout mainMenu={mainMenu} footerMenu={footerMenu} basicSettings={basicSettings}>
       <div className="container">
         <h1 className="page-heading page-heading_h1 page-heading_m-h1">Sell Item</h1>
+
+        {/* Success Message Alert */}
+        {successMessage && (
+          <div className="alert alert-success">
+            {successMessage}
+          </div>
+        )}
 
         <form className="product-form" onSubmit={handleSubmit}>
           <div className="form-group">
@@ -94,7 +112,7 @@ const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSideP
               onChange={handleImageChange}
               accept="image/*"
             />
-            {imageFile && <p>Selected file: {imageFile.name}</p>} {/* Display the selected file name */}
+            {imageFile && <p>Selected file: {imageFile.name}</p>}
           </div>
 
           <div className="form-group">
@@ -104,7 +122,7 @@ const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSideP
               id="quantity"
               value={quantity}
               onChange={handleQuantityChange}
-              min="0"  // HTML validation for quantity
+              min="0"
               placeholder="Enter quantity"
               required
             />
@@ -187,6 +205,15 @@ const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSideP
 
         .submit-btn:hover {
           background-color: darkgray;
+        }
+
+        .alert {
+          padding: 10px;
+          background-color: #4CAF50;
+          color: white;
+          margin-bottom: 20px;
+          text-align: center;
+          border-radius: 5px;
         }
       `}</style>
     </MainLayout>
