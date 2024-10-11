@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from enum import Enum
 import os
@@ -7,6 +7,8 @@ from sqlalchemy import text
 
 # Load environment variables from .env file
 load_dotenv()
+from enum import Enum
+import bcrypt
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -17,6 +19,8 @@ if not database_uri:
     raise RuntimeError("SQL_DATABASE_URI environment variable not set")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy()
 db.init_app(app)
@@ -30,6 +34,7 @@ db.init_app(app)
 # except Exception as e:
 #     print(f"Error connecting to the database: {e}")
 
+db = SQLAlchemy(app)
 
 # Enum for transaction status
 class TransactionStatus(Enum):
@@ -94,9 +99,89 @@ class Transaction(db.Model):
     total = db.Column(db.Numeric(10, 2))
     trans_status = db.Column(db.Enum(TransactionStatus))
 
+
+# Initialize the database
+@app.before_first_request
+def initialize_database():
+    db.create_all()
+
+
+# Endpoint to add a new user account
+@app.route('/api/createaccount', methods=['POST'])
+def create_account():
+    data = request.json  # Expecting JSON data
+
+    # Extracting fields from the request
+    name = data.get('name')
+    address = data.get('address')
+    phone_number = data.get('phone_number')
+    password = data.get('password')
+    wishlist = data.get('wishlist', '')  # Optional field, default to empty string
+    seller_id = data.get('seller_id')  # Optional field, can be None
+
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+    # Create a new account, seller_id can be None if not provided
+    new_account = Account(
+        name=name,
+        address=address,
+        phone_number=phone_number,
+        password=hashed_password.decode('utf-8'),
+        wishlist=wishlist,
+        seller_id=seller_id  # This can be null
+    )
+
+    # Add and commit the new account to the database
+    db.session.add(new_account)
+    db.session.commit()  # Persist the data
+
+    return jsonify({"message": "Account created successfully!"}), 201
+
+
+@app.route('/api/accounts', methods=['GET'])
+def get_all_accounts():
+    # Query all accounts from the database
+    accounts = Account.query.all()
+
+    # Print each account's details, including seller_id
+    for account in accounts:
+        print(f"ID: {account.acc_id}, Name: {account.name}, Address: {account.address}, "
+              f"Phone: {account.phone_number}, Wishlist: {account.wishlist}, Seller ID: {account.seller_id}")
+
+    # Return a JSON response including the seller_id
+    account_list = [{"id": account.acc_id, "name": account.name, "address": account.address,
+                     "phone_number": account.phone_number, "wishlist": account.wishlist,
+                     "seller_id": account.seller_id, "password": account.password}  # Include seller_id
+                    for account in accounts]
+
+    return jsonify(account_list), 200
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json  # Expecting JSON data
+
+    # Extracting username and password from the request
+    name = data.get('name')
+    password = data.get('password')
+
+    # Check if the account exists
+    account = Account.query.filter_by(name=name).first()
+
+    if account is None:
+        # If account does not exist, return an error
+        return jsonify({"message": "Account not found!"}), 404
+
+    # Verify the password
+    if bcrypt.checkpw(password.encode('utf-8'), account.password.encode('utf-8')):
+        # Password is correct, return success message
+        return jsonify({"message": "Login successful!"}), 200
+    else:
+        # Password is incorrect
+        return jsonify({"message": "Invalid password!"}), 401
+
 @app.route('/')
 def test():
-    pass
+    return "Flask app is running!"
 
 if __name__ == '__main__':
     app.run(debug=True)
