@@ -33,10 +33,13 @@ export const makeMenuByCategoryTree = ({categoryTree, isActiveClb}: {categoryTre
 };
 
 export const makeAllMenus = ({categoryTree, activeCategoryId}: {categoryTree: ICategory[], activeCategoryId?: number}): IMenus => {
-	const mainMenu = makeMenuByCategoryTree({
-		categoryTree,
-		isActiveClb: (category) => Boolean(activeCategoryId && activeCategoryId == category.category_id)
-	});
+	const mainMenu: IMenuItem[] = [
+		{
+			title: 'Seller Dashboard',
+			url: '/',
+			isActive: activeCategoryId === undefined,  // Make active if no category is active
+		}
+	];
 
 	const footerMenu = makeMenuByCategoryTree({categoryTree: categoryTree.filter(({level}) => level === 0)});
 
