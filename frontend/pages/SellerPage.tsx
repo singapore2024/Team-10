@@ -12,6 +12,8 @@ const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSideP
   const [price, setPrice] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);  // Updated for file input
   const [quantity, setQuantity] = useState<number>(1);
+  const [productType, setProductType] = useState('');  // New state for product type
+  const [otherType, setOtherType] = useState('');  // For "Other" type input
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -34,13 +36,15 @@ const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSideP
       formData.append('image', imageFile);
     }
     formData.append('quantity', quantity.toString());
+    formData.append('productType', productType === 'Other' ? otherType : productType);  // Save otherType if "Other" is selected
 
     // For demonstration purposes, log the form data (you can send this to an API)
     console.log({
       productName,
       price,
       imageFile, // This will log the file information
-      quantity
+      quantity,
+      productType: productType === 'Other' ? otherType : productType,
     });
 
     // Reset the form after submission
@@ -48,6 +52,8 @@ const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSideP
     setPrice('');
     setImageFile(null);
     setQuantity(1);
+    setProductType('');
+    setOtherType('');
   };
 
   return (
@@ -104,6 +110,37 @@ const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSideP
             />
           </div>
 
+          <div className="form-group">
+            <label htmlFor="type">Type of Product</label>
+            <select
+              id="type"
+              value={productType}
+              onChange={(e) => setProductType(e.target.value)}
+              required
+            >
+              <option value="">Select a type</option>
+              <option value="Vegetable">Vegetable</option>
+              <option value="Fruit">Fruit</option>
+              <option value="Herbs">Herbs</option>
+              <option value="Poultry">Poultry</option>
+              <option value="Other">Other (Please specify)</option>
+            </select>
+          </div>
+
+          {productType === 'Other' && (
+            <div className="form-group">
+              <label htmlFor="otherType">Specify Type</label>
+              <input
+                type="text"
+                id="otherType"
+                value={otherType}
+                onChange={(e) => setOtherType(e.target.value)}
+                placeholder="Specify other type"
+                required
+              />
+            </div>
+          )}
+
           <button type="submit" className="submit-btn">Submit Product</button>
         </form>
       </div>
@@ -126,7 +163,8 @@ const SellerPage = ({ mainMenu, footerMenu, basicSettings }: InferGetServerSideP
         }
 
         input[type="text"],
-        input[type="number"] {
+        input[type="number"],
+        select {
           width: 100%;
           padding: 10px;
           border: 1px solid #ccc;
