@@ -41,6 +41,14 @@ export const makeAllMenus = ({categoryTree, activeCategoryId}: {categoryTree: IC
 		}
 	];
 
+
+	// Add static Seller Dashboard link
+	mainMenu.push({
+		title: 'Seller Dashboard',
+		url: '/SellerPage',  // Correct path for the SellerPage component
+		isActive: false, // You can manage this based on user authentication if needed
+	});
+
 	const footerMenu = makeMenuByCategoryTree({categoryTree: categoryTree.filter(({level}) => level === 0)});
 
 	return {
