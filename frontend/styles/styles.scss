@@ -5,3 +5,61 @@
 @import 'components/index';
 
 @import 'themes/sample/basic';
+
+/* styles/global.css */
+
+.products-section {
+    margin-top: 2rem;
+  }
+  
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .product-card {
+    border: 1px solid #eee;
+    padding: 1rem;
+    text-align: center;
+  }
+  /* styles/global.css or the appropriate CSS file */
+
+.product-card {
+    /* existing styles */
+    border: 1px solid #eee;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  .add-to-cart-button {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    border-radius: 5px;
+  }
+  
+  .add-to-cart-button:hover {
+    background-color: #218838;
+  }
+  
+  
+  .product-card h2 {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+  }
+  
+  .product-card p {
+    margin: 0.25rem 0;
+  }
+  
+  .product-card .price {
+    color: #28a745;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  
