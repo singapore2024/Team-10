@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from enum import Enum
 import os, bcrypt, uuid
+from flask_cors import CORS
 from dotenv import load_dotenv
 
 
@@ -11,7 +12,7 @@ load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
-
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 # Configure SQLite database URI
 database_uri = os.getenv('SQL_DATABASE_URI')
 if not database_uri:
@@ -107,14 +108,14 @@ def initialize_database():
 
 
 # Endpoint to add a new user account
-@app.route('/api/createaccount', methods=['POST'])
+@app.route('/api/register', methods=['POST'])
 def create_account():
     data = request.json  # Expecting JSON data
 
     # Extracting fields from the request
     name = data.get('name')
     address = data.get('address', '') #Optional first
-    phone_number = data.get('phone_number')
+    phone_number = data.get('phoneNumber')
     password = data.get('password')
     wishlist = data.get('wishlist', '')  # Optional field, default to empty string
     seller_flag = data.get('seller_flag')
@@ -170,7 +171,7 @@ def login():
     data = request.json  # Expecting JSON data
 
     # Extracting username and password from the request
-    phone_number = data.get('phone_number')
+    phone_number = data.get('phoneNumber')
     password = data.get('password')
 
     # Check if the account exists

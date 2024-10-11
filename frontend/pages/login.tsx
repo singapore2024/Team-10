@@ -10,12 +10,32 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = () => {
-    // Example login logic (replace with actual API call)
-    if (phoneNumber === '+11234567890' && password === 'password') {
-      router.push('/dashboard'); // Redirect to dashboard after successful login
+  const handleLogin = async () => {
+    if (phoneNumber && password) {
+      try {
+        const response = await fetch('http://localhost:5000/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            phoneNumber,
+            password,
+          }),
+        });
+
+        if (response.ok) {
+          // If login is successful, redirect to the dashboard
+          router.push('/dashboard');
+        } else {
+          const data = await response.json();
+          setError(data.message || 'Login failed.');
+        }
+      } catch (err) {
+        setError('An error occurred during login.');
+      }
     } else {
-      setError('Invalid phone number or password.');
+      setError('Please enter a valid phone number and password.');
     }
   };
 
@@ -28,12 +48,19 @@ const LoginPage: React.FC = () => {
           <div className={styles.formGroup}>
             <label htmlFor="phone">Phone Number</label>
             <PhoneInput
-              country={'us'}
+              country={'sg'}
               value={phoneNumber}
               onChange={setPhoneNumber}
               inputClass={styles.input}
               containerClass={styles.phoneInputContainer}
               specialLabel={''}
+              inputStyle={{
+                padding: '30px',
+                fontSize: '16px',
+                width: '100%',
+                borderRadius: '6px',
+                border: '1px solid #ccc',
+              }}
             />
           </div>
           <div className={styles.formGroup}>

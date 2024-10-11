@@ -33,9 +33,17 @@ export const makeMenuByCategoryTree = ({categoryTree, isActiveClb}: {categoryTre
 };
 
 export const makeAllMenus = ({categoryTree, activeCategoryId}: {categoryTree: ICategory[], activeCategoryId?: number}): IMenus => {
-	const mainMenu = makeMenuByCategoryTree({
+	const mainMenu = makeMenuByCategoryTree(
+		{
 		categoryTree,
 		isActiveClb: (category) => Boolean(activeCategoryId && activeCategoryId == category.category_id)
+	});
+
+	// Add static Seller Dashboard link
+	mainMenu.push({
+		title: 'Seller Dashboard',
+		url: '/SellerPage',  // Correct path for the SellerPage component
+		isActive: false, // You can manage this based on user authentication if needed
 	});
 
 	const footerMenu = makeMenuByCategoryTree({categoryTree: categoryTree.filter(({level}) => level === 0)});
