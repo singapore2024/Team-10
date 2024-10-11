@@ -27,7 +27,7 @@ const RegisterPage: React.FC = () => {
       const is_seller = roles.includes('seller') ? 1 : 0; // If seller role is selected, set is_seller to 1, else 0
 
       try {
-        const response = await fetch('/api/register', {
+        const response = await fetch('http://localhost:5000/api/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
