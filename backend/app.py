@@ -249,7 +249,7 @@ def get_seller_by_id(seller_id):
 @app.route('/api/products', methods=['GET'])
 def get_all_products():
     products = Product.query.all()
-    product_list = [{"unid": product.unid, "product_id": product.product_id, "seller_id": product.seller_id, "qty": product.qty, "price": str(product.price), "name": product.name, "image": product.image, "type": product.type} for product in products]
+    product_list = [{"product_id": product.product_id, "seller_id": product.seller_id, "qty": product.qty, "price": str(product.price), "name": product.name, "image": product.image, "type": product.type} for product in products]
     return jsonify(product_list), 200
 
 @app.route('/api/products', methods=['POST'])
