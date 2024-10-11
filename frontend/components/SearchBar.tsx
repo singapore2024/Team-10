@@ -1,32 +1,31 @@
 import { useState } from 'react';
-import { useRouter } from 'next/router';
-import styles from '../styles/SearchBar.module.scss'; // Adjust based on your project structure
+import Fuse from 'fuse.js'; // Import fuse.js for fuzzy search
+import { IProduct } from '../@types/IProduct';
+import styles from '../styles/SearchBar.module.scss';
 
-const SearchBar: React.FC = () => {
+interface SearchBarProps {
+  products: IProduct[];
+  setFilteredResults: (results: IProduct[]) => void;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ products, setFilteredResults }) => {
   const [query, setQuery] = useState('');
-  const router = useRouter();
 
-  const handleSearch = async (e: React.FormEvent) => {
+  // Fuse.js configuration for semantic search
+  const fuse = new Fuse(products, {
+    keys: ['name', 'description', 'type'], // Fields in products to search in
+    threshold: 0.3, // Adjust fuzziness (0 = perfect match, 1 = anything matches)
+  });
+
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (query) {
-      try {
-        const response = await fetch(`/api/search`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ query }),
-        });
 
-        const data = await response.json();
-
-        if (data.results) {
-          console.log(data.results); // Handle search results
-        }
-      } catch (error) {
-        console.error('Error performing search:', error);
-      }
+    if (query.trim()) {
+      const results = fuse.search(query); // Perform fuzzy search
+      const filtered = results.map((result) => result.item); // Extract product objects
+      setFilteredResults(filtered); // Update filtered products
+    } else {
+      setFilteredResults(products); // Reset to all products if query is empty
     }
   };
 
